@@ -1,4 +1,4 @@
-Analytix is a swiss army knife TUI built in Go with Bubbletea that brings together everything you'd want to know about your machine and network into a single, fast TUI dashboard — CPU, RAM, disk, temperatures, running processes, live logs, open connections, LAN device scanning, port scanning, MAC spoofing, and security tooling, all without leaving your terminal. 
+**analytix** — the swiss army knife TUI for your terminal. Built with Go and Bubbletea, it puts everything you need to know about your machine and network in one place: CPU, RAM, disk I/O, temperatures, processes, live logs, open connections, LAN scanning, port scanning, MAC spoofing, and security tooling. You can also find analytix on __[Codeberg](https://codeberg.org/kikikian/analytix)__.
 
 # Tickets
 
@@ -197,7 +197,7 @@ Analytix is a swiss army knife TUI built in Go with Bubbletea that brings togeth
 ---
 
 - [ ] **Documentation**
-  - [ ] `README.md`
+  - [x] `README.md`
     - [ ] Description and full feature list
     - [ ] Install instructions (binary + build from source)
     - [ ] Screenshot / demo gif
@@ -216,6 +216,12 @@ Analytix is a swiss army knife TUI built in Go with Bubbletea that brings togeth
 ## Low Priority
 
 - [ ] **TUI & Navigation**
+  - [x] Command bar
+    - [x] Press `:` to enter command mode
+    - [x] `clear` command — reset all graph histories
+    - [x] `quit` / `q` command — exit the app
+    - [x] `help` command — list available commands
+    - [x] Success / error feedback display in bar
   - [ ] Tabbed interface
     - [ ] System tab
     - [ ] Network tab
