@@ -26,6 +26,8 @@ type Model struct {
 	UlHistory  []float64
 	CmdMode    bool
 	CmdInput   string
+	LastCmd    string
+	LastCmdErr bool
 }
 
 func New() Model {
@@ -44,7 +46,11 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			case "esc":
 				m.CmdMode = false
 				m.CmdInput = ""
-			case "enter":
+			case "enter", "ctrl+m", "\r":
+				var result commandResult
+				m, result = handleCommand(m, m.CmdInput)
+				m.LastCmd = result.message
+				m.LastCmdErr = result.err
 				m.CmdMode = false
 				m.CmdInput = ""
 			case "backspace":
@@ -89,14 +95,7 @@ func (m Model) View() string {
 		graphWidth = 10
 	}
 
-	var cmdBar string
-	if m.CmdMode {
-		cmdBar = ":" + m.CmdInput + "█"
-	} else {
-		cmdBar = "press : to enter command  |  q to quit"
-	}
-
-	main := fmt.Sprintf(
+	content := fmt.Sprintf(
 		"CPU: %.1f%%\n%s\n\nDownload: %s\n%s\n\nUpload: %s\n%s",
 		m.Cpu,
 		ui.RenderCPUGraph(m.CpuHistory, graphWidth, 8),
@@ -106,5 +105,5 @@ func (m Model) View() string {
 		ui.RenderUploadGraph(m.UlHistory, graphWidth, 6),
 	)
 
-	return main + "\n\n" + cmdBar
+	return content + "\n\n" + ui.RenderCmdBar(m.CmdMode, m.CmdInput, m.LastCmd, m.LastCmdErr, m.Width)
 }
