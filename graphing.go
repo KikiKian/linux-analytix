@@ -1,48 +1,68 @@
 package main
 
-import (
-	"github.com/NimbleMarkets/ntcharts/canvas/runes"
-	"github.com/NimbleMarkets/ntcharts/linechart/streamlinechart"
-	"github.com/charmbracelet/lipgloss"
-)
+import "github.com/guptarohit/asciigraph"
 
-func newDualGraph(width, height int, color1, color2 string) streamlinechart.Model {
-	style1 := lipgloss.NewStyle().Foreground(lipgloss.Color(color1))
-	style2 := lipgloss.NewStyle().Foreground(lipgloss.Color(color2))
+const historySize = 200
 
-	slc := streamlinechart.New(width, height,
-		streamlinechart.WithDataSetStyles("line1", runes.ArcLineStyle, style1),
-		streamlinechart.WithDataSetStyles("line2", runes.ArcLineStyle, style2),
-	)
-	return slc
-}
-
-func newGraph(width, height int, color string) streamlinechart.Model {
-	style := lipgloss.NewStyle().Foreground(lipgloss.Color(color))
-	slc := streamlinechart.New(width, height,
-		streamlinechart.WithStyles(runes.ArcLineStyle, style),
-	)
-	return slc
-}
-
-func pushDual(slc *streamlinechart.Model, val1, val2 float64) {
-	slc.PushDataSet("line1", val1)
-	slc.PushDataSet("line2", val2)
-	slc.DrawAll()
-}
-
-func pushSingle(slc *streamlinechart.Model, value float64) {
-	slc.Push(value)
-	slc.Draw()
-}
-
-func graphColor(percent float64) string {
-	switch {
-	case percent > 80:
-		return "#E24B4A"
-	case percent > 60:
-		return "#EF9F27"
-	default:
-		return "#5DCAA5"
+func appendHistory(history []float64, value float64) []float64 {
+	history = append(history, value)
+	if len(history) > historySize {
+		history = history[1:]
 	}
+	return history
+}
+
+func smooth(history []float64, window int) []float64 {
+	if len(history) < window {
+		return history
+	}
+	smoothed := make([]float64, len(history))
+	for i := range history {
+		start := i - window + 1
+		if start < 0 {
+			start = 0
+		}
+		sum := 0.0
+		for _, v := range history[start : i+1] {
+			sum += v
+		}
+		smoothed[i] = sum / float64(i-start+1)
+	}
+	return smoothed
+}
+
+func renderCPUGraph(history []float64, width, height int) string {
+	if len(history) == 0 {
+		return ""
+	}
+	return asciigraph.Plot(smooth(history, 5),
+		asciigraph.Height(height),
+		asciigraph.Width(width),
+		asciigraph.LowerBound(0),
+		asciigraph.UpperBound(100),
+		asciigraph.SeriesColors(asciigraph.Green),
+	)
+}
+func renderDownloadGraph(history []float64, width, height int) string {
+	if len(history) == 0 {
+		return ""
+	}
+	return asciigraph.Plot(smooth(history, 5),
+		asciigraph.Height(height),
+		asciigraph.Width(width),
+		asciigraph.LowerBound(0),
+		asciigraph.SeriesColors(asciigraph.Cyan),
+	)
+}
+
+func renderUploadGraph(history []float64, width, height int) string {
+	if len(history) == 0 {
+		return ""
+	}
+	return asciigraph.Plot(smooth(history, 5),
+		asciigraph.Height(height),
+		asciigraph.Width(width),
+		asciigraph.LowerBound(0),
+		asciigraph.SeriesColors(asciigraph.Magenta),
+	)
 }
